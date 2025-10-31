@@ -21,6 +21,18 @@ add content to file 1
 
     --------commits
 
+PUSHING THE FILES AND COMMITS
+    +first time
+        if ur connecting ur local with github for first time u have to run 
+        git push origin main
+    +later
+        if u add commits then u only have to do 
+        git push
+
+        EXAMPLE
+            git add text1.txt
+            git commit -m "new file"
+            git push
 
 BRANCHING AND CONFLICTS
     git branch -> gives list of branches
