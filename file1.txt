@@ -1,6 +1,8 @@
 this is file 1 for understanding git
 
 add content to file 1
+    git init -> initializes the current folder as a repo and .git folder 
+    this folder now will be seen through source control
 
     git status -> tells what files are staged,left to be staged etc ....made changes but havent been added
     git add . -> adds all files
