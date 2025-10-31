@@ -4,6 +4,7 @@ add content to file 1
 
 branching and conflicts
 
+git status -> tells what files are staged,left to be staged etc ....made changes but havent been added
 git add . -> adds all files
 git add file1.txt file2.txt ->multiple files
 
