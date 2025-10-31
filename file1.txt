@@ -2,22 +2,30 @@ this is file 1 for understanding git
 
 add content to file 1
 
-branching and conflicts
+    git status -> tells what files are staged,left to be staged etc ....made changes but havent been added
+    git add . -> adds all files
+    git add file1.txt file2.txt ->multiple files
 
-git status -> tells what files are staged,left to be staged etc ....made changes but havent been added
-git add . -> adds all files
-git add file1.txt file2.txt ->multiple files
+    -------takes us to staging area
 
--------takes us to staging area
+    git commmit -m "message"
 
-git commmit -m "message"
-
---------commits
+    --------commits
 
 
+BRANCHING AND CONFLICTS
+    git branch -> gives list of branches
+    git branch "name" -> makes a new branch 
 
-git branch -> gives list of branches
-git branch "name" -> makes a new branch 
+    git switch "name" -> switches to that branch
 
-git switch "name" -> switches to that branch
+HOW BRANCHING WORKS
+    say u have main branch with all your code
+    then u made a new branch named TEST1 
+    then u created a file2.txt and pushed it
 
+    now your TEST1 branch will have all the code from before + TEST2.txt
+    
+    so basically each branch inherits all its content from parent and the new content being pushed gets added to the branch
+    
+    when u switch back to main u wont find those changes
