@@ -1,5 +1,5 @@
 import express from "express"
-import { createUser, deleteUser, getSpecificUser, getUsers, registerUser, updateUser } from "../controllers/user.controller.js"
+import { createUser, deleteUser, getSpecificUser, getUsers, login, registerUser, updateUser } from "../controllers/user.controller.js"
 // import { createUser, deleteUser, getSpecifcUser, getUsers, updateUser } from "../controllers/array_user.js"
 
 
@@ -12,4 +12,5 @@ router.put("/:id",updateUser)
 router.delete('/:id',deleteUser)
 
 router.post("/register",registerUser)
+router.post("/login",login)
 export default router

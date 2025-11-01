@@ -8,6 +8,26 @@ import { user } from "../models/user.model.js";
 // .findByIdAndUpdate()     takes id and two objects 
                                 // +one for data
                                 // +one for schema_validation and instant updation
+
+
+const generateAccessAndRefreshTokens = async (userid) =>{
+  let checkuser,accessToken,refreshToken
+  try {
+    checkuser = await user.findById(userid)
+    if(!checkuser) throw new Error("user not found for token generation")
+
+      accessToken = checkuser.generateAccessToken()
+      refreshToken = checkuser.generateRefreshToken()
+    
+  } catch (error) {
+    return res.status(500).json({message : `token generation didnt even started\n${error.message}`,success:false})
+  }
+  checkuser.refreshToken = refreshToken
+  await checkuser.save({validateBeforeSave : false})
+  return {accessToken,refreshToken}
+}
+
+
 export const createUser = async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -105,3 +125,39 @@ export const registerUser = async (req,res)=>{
   }
 }
 
+export const login = async (req,res)=>{
+  try {
+    const {email,password} = req.body
+    
+    if(!email || !password) return res.status(400).json({message : "all fields required",success:false})
+
+    const existing_user = await user.findOne({email})
+    if(!existing_user) return res.status(400).json({message : "user doesnt exist cant login",success:false})
+    //user exists so check if the password is correct THEN give tokens
+    const correctPassword = await existing_user.isPasswordCorrect(password)
+    if(!correctPassword) return res.status(400).json({message : "wrong password",success:false})
+    //if yes ,now we checked user exist,since he exist then we'll need tokens
+    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(existing_user._id)
+    const loggedInUser = await user.findById(existing_user._id).select("-password -refreshToken")
+
+    const options = {
+      httpOnly :true,
+      secure : true
+    }
+
+    return res.status(200)
+    .cookie("accesstoken",accessToken,options)
+    .cookie("refreshtoken",refreshToken,options)
+    .json({
+      message : "user logged in successfully",
+      success : true,
+      loggedInUser,
+      tokens:{
+        accessToken,
+        refreshToken
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({message:error.message,success:false})
+  }
+}
