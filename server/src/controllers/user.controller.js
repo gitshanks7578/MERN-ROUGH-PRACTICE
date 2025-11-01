@@ -5,28 +5,30 @@ import { user } from "../models/user.model.js";
 // .create({})              takes Object
 // .find()                  gives full list
 // .findById()              takes mongodb _id STRING FORMAT
-// .findByIdAndUpdate()     takes id and two objects 
-                                // +one for data
-                                // +one for schema_validation and instant updation
+// .findByIdAndUpdate()     takes id and two objects
+// +one for data
+// +one for schema_validation and instant updation
 
-
-const generateAccessAndRefreshTokens = async (userid) =>{
-  let checkuser,accessToken,refreshToken
+const generateAccessAndRefreshTokens = async (userid) => {
+  let checkuser, accessToken, refreshToken;
   try {
-    checkuser = await user.findById(userid)
-    if(!checkuser) throw new Error("user not found for token generation")
+    checkuser = await user.findById(userid);
+    if (!checkuser) throw new Error("user not found for token generation");
 
-      accessToken = checkuser.generateAccessToken()
-      refreshToken = checkuser.generateRefreshToken()
-    
+    accessToken = checkuser.generateAccessToken();
+    refreshToken = checkuser.generateRefreshToken();
   } catch (error) {
-    return res.status(500).json({message : `token generation didnt even started\n${error.message}`,success:false})
+    return res
+      .status(500)
+      .json({
+        message: `token generation didnt even started\n${error.message}`,
+        success: false,
+      });
   }
-  checkuser.refreshToken = refreshToken
-  await checkuser.save({validateBeforeSave : false})
-  return {accessToken,refreshToken}
-}
-
+  checkuser.refreshToken = refreshToken;
+  await checkuser.save({ validateBeforeSave: false });
+  return { accessToken, refreshToken };
+};
 
 export const createUser = async (req, res) => {
   try {
@@ -75,89 +77,151 @@ export const updateUser = async (req, res) => {
       req.params.id,
       { name: req.body.name, email: req.body.email },
 
-    // new:true ->instant front end response needed if u dont care to show and update silently then dont use it
-    //   runvalidators - Mongoose does NOT run schema validators (like required, minlength, enum) on findByIdAndUpdate by default. 
+      // new:true ->instant front end response needed if u dont care to show and update silently then dont use it
+      //   runvalidators - Mongoose does NOT run schema validators (like required, minlength, enum) on findByIdAndUpdate by default.
 
       { new: true, runValidators: true }
     );
 
-    if(!update_user) return res.status(400).json({ message: "user doesnt exist", success: false });
-    return res.status(200).json({message:"updated successfully",success:true})
-
+    if (!update_user)
+      return res
+        .status(400)
+        .json({ message: "user doesnt exist", success: false });
+    return res
+      .status(200)
+      .json({ message: "updated successfully", success: true });
   } catch (error) {
     return res.status(500).json({ message: "server error", success: false });
   }
 };
 
-
-export const deleteUser = async (req,res)=>{
-    try {
-        const delete_user = await user.findByIdAndDelete(req.params.id)
-        if(!delete_user) return res.status(400).json({ message: "user doesnt exist", success: false });
-
-
-        return res.status(200).json({message:"deleted successfully",success:true})
-    } catch (error) {
-         return res.status(500).json({ message: "server error", success: false });
-    }
-}
-
-export const registerUser = async (req,res)=>{
+export const deleteUser = async (req, res) => {
   try {
-    const {name,email,password} = req.body
+    const delete_user = await user.findByIdAndDelete(req.params.id);
+    if (!delete_user)
+      return res
+        .status(400)
+        .json({ message: "user doesnt exist", success: false });
 
-    if(!name || !email || !password) return res.status(400).json({message : "all fields are required",success:false})
-    const existingUser = await user.findOne({email})
-    if(existingUser) return res.status(400).json({message : "user already exists",success:false})
-    
+    return res
+      .status(200)
+      .json({ message: "deleted successfully", success: true });
+  } catch (error) {
+    return res.status(500).json({ message: "server error", success: false });
+  }
+};
+
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password)
+      return res
+        .status(400)
+        .json({ message: "all fields are required", success: false });
+    const existingUser = await user.findOne({ email });
+    if (existingUser)
+      return res
+        .status(400)
+        .json({ message: "user already exists", success: false });
+
     // const newUser = new user({name,email,password})
     // const savedUser = await newUser.save()
-    const newUser = await user.create({name,email,password})
-    if(!newUser){
-       return res.status(500).json({message : "something went wrong while saving user",success:false})
+    const newUser = await user.create({ name, email, password });
+    if (!newUser) {
+      return res
+        .status(500)
+        .json({
+          message: "something went wrong while saving user",
+          success: false,
+        });
+    } else {
+      return res.status(200).json({ success: true, newUser });
     }
-    else{
-      return res.status(200).json({success:true,newUser})
-    }
-
   } catch (error) {
-    return res.status(500).json({message : error.message,success:false})
+    return res.status(500).json({ message: error.message, success: false });
   }
-}
+};
 
-export const login = async (req,res)=>{
+export const login = async (req, res) => {
   try {
-    const {email,password} = req.body
-    
-    if(!email || !password) return res.status(400).json({message : "all fields required",success:false})
+    const { email, password } = req.body;
 
-    const existing_user = await user.findOne({email})
-    if(!existing_user) return res.status(400).json({message : "user doesnt exist cant login",success:false})
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ message: "all fields required", success: false });
+
+    const existing_user = await user.findOne({ email });
+    if (!existing_user)
+      return res
+        .status(400)
+        .json({ message: "user doesnt exist cant login", success: false });
     //user exists so check if the password is correct THEN give tokens
-    const correctPassword = await existing_user.isPasswordCorrect(password)
-    if(!correctPassword) return res.status(400).json({message : "wrong password",success:false})
+    const correctPassword = await existing_user.isPasswordCorrect(password);
+    if (!correctPassword)
+      return res
+        .status(400)
+        .json({ message: "wrong password", success: false });
     //if yes ,now we checked user exist,since he exist then we'll need tokens
-    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(existing_user._id)
-    const loggedInUser = await user.findById(existing_user._id).select("-password -refreshToken")
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      existing_user._id
+    );
+    const loggedInUser = await user
+      .findById(existing_user._id)
+      .select("-password -refreshToken");
 
     const options = {
-      httpOnly :true,
-      secure : true
-    }
+      httpOnly: true,
+      secure: true,
+    };
 
-    return res.status(200)
-    .cookie("accesstoken",accessToken,options)
-    .cookie("refreshtoken",refreshToken,options)
-    .json({
-      message : "user logged in successfully",
-      success : true,
-      loggedInUser,
-      tokens:{
-        accessToken,
-        refreshToken
-      }
-    })
+    return res
+      .status(200)
+      .cookie("accesstoken", accessToken, options)
+      .cookie("refreshtoken", refreshToken, options)
+      .json({
+        message: "user logged in successfully",
+        success: true,
+        loggedInUser,
+        tokens: {
+          accessToken,
+          refreshToken,
+        },
+      });
   } catch (error) {
-    return res.status(500).json({message:error.message,success:false})
+    return res.status(500).json({ message: error.message, success: false });
   }
+};
+
+export const logout = async (req, res) => {
+  const logout_user = await user.findByIdAndUpdate(
+    req.User._id,
+    {
+      $unset: {
+        refreshToken: "",
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const options = {
+    httpOnly:true,
+    secure:true
+  }
+
+  return res.status(200)
+  .clearCookie("accesstoken",options)
+  .clearCookie("refreshtoken",options)
+  .json({
+    message : "user logged out successfully",
+    success:true,
+    logout_user
+  })
+};
+
+export const post = async(req,res)=>{
+ return res.status(200).json({message : "posts"})
 }
