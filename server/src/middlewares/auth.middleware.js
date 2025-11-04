@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 //while REFRESH TOKENS are saved into the database
 export const verifyJwt = async(req,res,next)=>{
     try {
-        const token = req?.cookies.accesstoken || req.header("authorization")?.replace("Bearer : ","")
+        const token = req?.cookies.accesstoken || req.header("authorization")?.replace("Bearer ","")
         if(!token) throw new Error("401 unauthorized")
         const decoded_token =  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
         const existing_user  = await user.findById(decoded_token._id).select("-password -refreshToken")
