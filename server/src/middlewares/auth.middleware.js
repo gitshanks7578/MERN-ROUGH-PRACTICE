@@ -2,7 +2,6 @@
 import {user} from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 
-
 //ACCESS TOKENS are saved into cookies or headers
 //while REFRESH TOKENS are saved into the database
 // export const verifyJwt = async(req,res,next)=>{

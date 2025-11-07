@@ -1,4 +1,5 @@
 import { user } from "../models/user.model.js";
+import { deleteUserAndData } from "../utils/deleteUserAndData.js";
 import { sendVerificationEmail } from "../utils/mailtrap/emails.js";
 // functions we learnt
 
@@ -48,86 +49,86 @@ const generateAccessAndRefreshTokens = async(userid) =>{
 }
 
 
-export const createUser = async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    //when we take and say   !name or !email this means either we'll get an object or UNDEFINED...undefined simply means there was no entry
-    if (!name || !email)
-      return res
-        .status(400)
-        .json({ message: "all fields are required", success: false });
+// export const createUser = async (req, res) => {
+//   try {
+//     const { name, email } = req.body;
+//     //when we take and say   !name or !email this means either we'll get an object or UNDEFINED...undefined simply means there was no entry
+//     if (!name || !email)
+//       return res
+//         .status(400)
+//         .json({ message: "all fields are required", success: false });
 
-    const newUser = await user.create({ name, email });
-    return res
-      .status(200)
-      .json({ message: "user created successfully", success: true });
-  } catch (error) {
-    return res.status(500).json({ message: "server error", success: false });
-  }
-};
+//     const newUser = await user.create({ name, email });
+//     return res
+//       .status(200)
+//       .json({ message: "user created successfully", success: true });
+//   } catch (error) {
+//     return res.status(500).json({ message: "server error", success: false });
+//   }
+// };
 
-export const getUsers = async (req, res) => {
-  try {
-    const users = await user.find();
-    return res.status(200).json({ success: true, users });
-  } catch (error) {
-    return res.status(500).json({ message: "server error", success: false });
-  }
-};
+// export const getUsers = async (req, res) => {
+//   try {
+//     const users = await user.find();
+//     return res.status(200).json({ success: true, users });
+//   } catch (error) {
+//     return res.status(500).json({ message: "server error", success: false });
+//   }
+// };
 
-export const getSpecificUser = async (req, res) => {
-  try {
-    const specific_user = await user.findById(req.params.id);
-    if (!specific_user)
-      return res
-        .status(400)
-        .json({ message: "user doesnt exist", success: false });
+// export const getSpecificUser = async (req, res) => {
+//   try {
+//     const specific_user = await user.findById(req.params.id);
+//     if (!specific_user)
+//       return res
+//         .status(400)
+//         .json({ message: "user doesnt exist", success: false });
 
-    return res.status(200).json({ success: true, specific_user });
-  } catch (error) {
-    return res.status(500).json({ message: "server error", success: false });
-  }
-};
+//     return res.status(200).json({ success: true, specific_user });
+//   } catch (error) {
+//     return res.status(500).json({ message: "server error", success: false });
+//   }
+// };
 
-export const updateUser = async (req, res) => {
-  try {
-    const update_user = await user.findByIdAndUpdate(
-      req.params.id,
-      { name: req.body.name, email: req.body.email },
+// export const updateUser = async (req, res) => {
+//   try {
+//     const update_user = await user.findByIdAndUpdate(
+//       req.params.id,
+//       { name: req.body.name, email: req.body.email },
 
-      // new:true ->instant front end response needed if u dont care to show and update silently then dont use it
-      //   runvalidators - Mongoose does NOT run schema validators (like required, minlength, enum) on findByIdAndUpdate by default.
+//       // new:true ->instant front end response needed if u dont care to show and update silently then dont use it
+//       //   runvalidators - Mongoose does NOT run schema validators (like required, minlength, enum) on findByIdAndUpdate by default.
 
-      { new: true, runValidators: true }
-    );
+//       { new: true, runValidators: true }
+//     );
 
-    if (!update_user)
-      return res
-        .status(400)
-        .json({ message: "user doesnt exist", success: false });
-    return res
-      .status(200)
-      .json({ message: "updated successfully", success: true });
-  } catch (error) {
-    return res.status(500).json({ message: "server error", success: false });
-  }
-};
+//     if (!update_user)
+//       return res
+//         .status(400)
+//         .json({ message: "user doesnt exist", success: false });
+//     return res
+//       .status(200)
+//       .json({ message: "updated successfully", success: true });
+//   } catch (error) {
+//     return res.status(500).json({ message: "server error", success: false });
+//   }
+// };
 
-export const deleteUser = async (req, res) => {
-  try {
-    const delete_user = await user.findByIdAndDelete(req.params.id);
-    if (!delete_user)
-      return res
-        .status(400)
-        .json({ message: "user doesnt exist", success: false });
+// export const deleteUser = async (req, res) => {
+//   try {
+//     const delete_user = await user.findByIdAndDelete(req.params.id);
+//     if (!delete_user)
+//       return res
+//         .status(400)
+//         .json({ message: "user doesnt exist", success: false });
 
-    return res
-      .status(200)
-      .json({ message: "deleted successfully", success: true });
-  } catch (error) {
-    return res.status(500).json({ message: "server error", success: false });
-  }
-};
+//     return res
+//       .status(200)
+//       .json({ message: "deleted successfully", success: true });
+//   } catch (error) {
+//     return res.status(500).json({ message: "server error", success: false });
+//   }
+// };
 
 // export const registerUser = async (req, res) => {
 //   try {
@@ -265,7 +266,6 @@ export const registerUser = async(req,res)=>{
       verificationCodeExpiresIn
     })
     if(!newUser) return res.status(500).json({message : "db error",success:false})
-    await sendVerificationEmail(email,verificationToken)
     return res.status(200).json({message:"user registered successfully",success:true,newUser})
 
 
@@ -349,6 +349,79 @@ export const logout = async(req,res)=>{
     return res.status(500).json({message:`logout failed in first step || ${err.message}`})
   }
 }
+
+export const verify_email = async(req,res)=>{
+  try {
+    const {email,token} = req.body;
+    if(!token || !email) return res.status(400).json({message:"otp is required",success:false})
+    
+    const current_user = await user.findOne({
+      email,
+      verificationToken:token,
+      verificationCodeExpiresIn : {
+        $gt : Date.now()
+      }
+    })
+
+    if(!current_user) return res.status(400).json({message:"invalid verifcation token",success:false})
+    current_user.isVerified = true
+    current_user.verificationToken = undefined
+    current_user.verificationCodeExpiresIn = undefined
+    await user.save()
+
+    await sendWelcomeEmail(current_user.email,current_user.name)
+
+    return res.status(200).json({message : "user veriified",success:true})
+ 
+    
+  } catch (error) {
+    return res.status(500).json({message :`verify email first step failed ${error.message}`,success:false})
+  }
+}
+export const forgetPassword = async(req,res)=>{
+  try {
+    const {email,newPassword,confirmPassword} = req.body
+    if(!newPassword || !confirmPassword) return res.status(400).json({message:"all fields are required",success:false})
+    if(newPassword !== confirmPassword)
+    return res.status(400).json({message:"both fields should be same",success:false})
+    const user_in_db =  await user.findOne({email})
+    user_in_db.password = confirmPassword
+    user_in_db.verificationToken = undefined
+    user_in_db.verificationCodeExpiresIn = undefined
+    user_in_db.isVerified = undefined
+    await user_in_db.save()
+    return res.status(200).json({message:"password changed successfully",success:true})
+    
+
+  } catch (error) {
+    return res.status(500).json({message:`forget_password in first step || ${error.message}`})
+  }
+}
+
+// u can also define path : "" in cookies ,clearCookie function wont work if the cookies do not have same path 
+export const removeUser = async(req,res)=>{
+  try {
+    // const user_for_deletion = await user.findByIdAndDelete(req.User._id)
+    // if(!user_for_deletion) return res.status(400).json({message : "no such user found for deletion",success:false})
+    const user_for_deletion = await deleteUserAndData(req.User._id)
+    if(!user_for_deletion) return res.status(400).json({message:"no such user found",success:false})
+
+    const options = {
+      httpOnly:true,
+      secure:true
+    }
+    return res.status(200)
+    .clearCookie("refreshToken",options)
+    .clearCookie("accessToken",options)
+    .json({message:"user deleted successfully" , success:true,user_for_deletion})
+  } catch (error) {
+    return res.status(500).json({message:`user deletion failed in first step || ${error.message} `})
+  }
+}
+
+
+
+
 export const post = async(req,res)=>{
  return res.status(200).json({message : "posts"})
 }

@@ -87,6 +87,10 @@ const userSchema = mongoose.Schema({
     refreshToken:{
         type:String
     },
+    isVerified:{
+        type:Boolean,
+        default:false
+    },
     verificationToken:{
         type:Number,
     },
